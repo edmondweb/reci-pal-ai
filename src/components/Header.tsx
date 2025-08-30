@@ -1,20 +1,15 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChefHat, Heart, LogIn, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { EmailSignupDialog } from "@/components/EmailSignupDialog";
 
-interface HeaderProps {
-  isAuthenticated?: boolean;
-  onLogin?: () => void;
-  onRegister?: () => void;
-  onLogout?: () => void;
-}
+interface HeaderProps {}
 
-export const Header = ({ 
-  isAuthenticated = false, 
-  onLogin, 
-  onRegister, 
-  onLogout 
-}: HeaderProps) => {
+export const Header = ({}: HeaderProps) => {
+  const { user, signOut } = useAuth();
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -32,7 +27,7 @@ export const Header = ({
           >
             Home
           </Link>
-          {isAuthenticated && (
+          {user && (
             <Link 
               to="/favorites" 
               className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -45,17 +40,17 @@ export const Header = ({
 
         {/* Auth Buttons */}
         <div className="flex items-center gap-2">
-          {isAuthenticated ? (
-            <Button variant="outline" onClick={onLogout}>
+          {user ? (
+            <Button variant="outline" onClick={signOut}>
               Logout
             </Button>
           ) : (
             <>
-              <Button variant="ghost" onClick={onLogin}>
+              <Button variant="ghost" onClick={() => setShowSignupDialog(true)}>
                 <LogIn className="h-4 w-4 mr-2" />
-                Login
+                Sign In
               </Button>
-              <Button variant="default" onClick={onRegister}>
+              <Button variant="default" onClick={() => setShowSignupDialog(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Sign Up
               </Button>
@@ -63,6 +58,11 @@ export const Header = ({
           )}
         </div>
       </div>
+      
+      <EmailSignupDialog 
+        open={showSignupDialog} 
+        onOpenChange={setShowSignupDialog} 
+      />
     </header>
   );
 };

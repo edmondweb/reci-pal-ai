@@ -7,6 +7,7 @@ import { RecipeCard, Recipe } from "@/components/RecipeCard";
 import { IngredientChip } from "@/components/IngredientChip";
 import { RecipeModal } from "@/components/RecipeModal";
 import { Search, Sparkles, Clock, Users } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import heroImage from "@/assets/hero-ingredients.jpg";
 
 // Sample data for demo
@@ -97,8 +98,8 @@ const Index = () => {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { user } = useAuth();
 
   const handleIngredientSelect = (ingredient: string) => {
     if (!selectedIngredients.includes(ingredient)) {
@@ -135,7 +136,7 @@ const Index = () => {
   };
 
   const handleToggleFavorite = (recipeId: string) => {
-    if (!isAuthenticated) {
+    if (!user) {
       // Show login prompt
       return;
     }
@@ -151,12 +152,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        isAuthenticated={isAuthenticated}
-        onLogin={() => setIsAuthenticated(true)}
-        onRegister={() => setIsAuthenticated(true)}
-        onLogout={() => setIsAuthenticated(false)}
-      />
+      <Header />
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary/5 to-secondary/5 py-16 overflow-hidden">
@@ -306,7 +302,7 @@ const Index = () => {
                   onViewRecipe={handleViewRecipe}
                   onToggleFavorite={handleToggleFavorite}
                   isFavorited={favorites.has(recipe.id)}
-                  showFavoriteButton={isAuthenticated}
+                  showFavoriteButton={!!user}
                 />
               ))}
             </div>
