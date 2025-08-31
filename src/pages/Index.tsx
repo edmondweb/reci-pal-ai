@@ -8,6 +8,7 @@ import { IngredientChip } from "@/components/IngredientChip";
 import { RecipeModal } from "@/components/RecipeModal";
 import { Search, Sparkles, Clock, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-ingredients.jpg";
 
 // Sample data for demo
@@ -122,12 +123,30 @@ const Index = () => {
     if (selectedIngredients.length === 0) return;
     
     setIsGenerating(true);
-    // Simulate API call - in real app, this would call OpenAI API
-    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // For demo, just show existing recipes
-    setRecipes(SAMPLE_RECIPES);
-    setIsGenerating(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-recipes', {
+        body: { ingredients: selectedIngredients }
+      });
+
+      if (error) {
+        console.error('Error calling generate-recipes function:', error);
+        throw error;
+      }
+
+      if (data?.recipes) {
+        setRecipes(data.recipes);
+      } else {
+        console.error('No recipes returned from API');
+        setRecipes(SAMPLE_RECIPES); // Fallback to sample recipes
+      }
+    } catch (error) {
+      console.error('Failed to generate recipes:', error);
+      // Fallback to sample recipes on error
+      setRecipes(SAMPLE_RECIPES);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleViewRecipe = (recipe: Recipe) => {
