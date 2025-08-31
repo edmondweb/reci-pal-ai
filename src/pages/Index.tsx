@@ -95,7 +95,7 @@ const SAMPLE_RECIPES: Recipe[] = [
 const Index = () => {
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [customIngredient, setCustomIngredient] = useState("");
-  const [recipes, setRecipes] = useState<Recipe[]>(SAMPLE_RECIPES);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -138,12 +138,11 @@ const Index = () => {
         setRecipes(data.recipes);
       } else {
         console.error('No recipes returned from API');
-        setRecipes(SAMPLE_RECIPES); // Fallback to sample recipes
+        setRecipes([]); // Clear recipes on error
       }
     } catch (error) {
       console.error('Failed to generate recipes:', error);
-      // Fallback to sample recipes on error
-      setRecipes(SAMPLE_RECIPES);
+      setRecipes([]); // Clear recipes on error
     } finally {
       setIsGenerating(false);
     }
