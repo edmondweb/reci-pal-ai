@@ -42,7 +42,8 @@ There are several ways to edit this code:
    ```sh
    git clone <YOUR_GIT_URL>
 2. Navigate to the project directory:
-   cd <YOUR_PROJECT_NAME>
+
+cd <YOUR_PROJECT_NAME>
 Install dependencies:
 
 npm install
