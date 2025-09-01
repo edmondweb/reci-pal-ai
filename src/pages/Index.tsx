@@ -256,7 +256,7 @@ const Index = () => {
                   placeholder="Add your own ingredient..."
                   value={customIngredient}
                   onChange={(e) => setCustomIngredient(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddCustomIngredient()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddCustomIngredient()}
                   className="flex-1"
                 />
                 <Button 

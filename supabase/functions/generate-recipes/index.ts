@@ -83,21 +83,42 @@ Make sure the recipes are practical, use common cooking techniques, and result i
     const data = await response.json();
     console.log('OpenAI API response received');
     
-    const generatedContent = data.choices[0].message.content;
+    let generatedContent = data.choices?.[0]?.message?.content?.trim() || '';
+    // Strip code fences if present
+    generatedContent = generatedContent.replace(/```(?:json)?/g, '').trim();
     console.log('Generated content:', generatedContent);
-    
-    // Parse the JSON response from OpenAI
-    let recipes;
+
+    // Parse the JSON response from OpenAI with fallbacks
+    let parsed: any;
     try {
-      recipes = JSON.parse(generatedContent);
+      parsed = JSON.parse(generatedContent);
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response as JSON:', parseError);
-      console.error('Raw content:', generatedContent);
-      throw new Error('Invalid JSON response from OpenAI');
+      // Try to extract the first JSON array from the text
+      const match = generatedContent.match(/\[[\s\S]*\]/);
+      if (match) {
+        try {
+          parsed = JSON.parse(match[0]);
+        } catch (innerErr) {
+          console.error('Failed to parse extracted JSON array:', innerErr);
+          console.error('Raw content:', generatedContent);
+          throw new Error('Invalid JSON response from OpenAI');
+        }
+      } else {
+        console.error('Failed to parse OpenAI response as JSON:', parseError);
+        console.error('Raw content:', generatedContent);
+        throw new Error('Invalid JSON response from OpenAI');
+      }
+    }
+
+    // Support either an array or an object with a recipes property
+    const recipesArray = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.recipes) ? parsed.recipes : null;
+    if (!recipesArray) {
+      console.error('Parsed content is not a recipes array:', parsed);
+      throw new Error('Model did not return a recipes array');
     }
 
     // Add unique IDs to recipes
-    const recipesWithIds = recipes.map((recipe: any, index: number) => ({
+    const recipesWithIds = recipesArray.map((recipe: any, index: number) => ({
       id: `generated-${Date.now()}-${index}`,
       ...recipe
     }));
